@@ -70,6 +70,28 @@ Because that step can be skipped, check for it on the next open: if the newest f
 folder predates the last release handed over, say so plainly. A release that never made it
 back is invisible otherwise, and the next session would silently build on stale work.
 
+## If writing back becomes possible
+
+Everything above describes the tool surfaces as they are, not a law. If a connector does
+expose a binary upload — check, do not assume — then use it. Closing the loop removes the
+one step that gets skipped, and the check for "a release that never made it back" stops
+being needed.
+
+Two things do **not** change:
+
+**Still create, never overwrite.** Upload as a new dated filename exactly as before. An
+overwrite is silent about whatever was there — you cannot know the folder was untouched
+since the fetch. Creating means a collision shows up as two archives side by side, visible
+and recoverable. Automation removes the user's button press; it does not remove the
+discipline that makes the button press safe.
+
+**Still confirm before writing.** Putting a file into someone's cloud storage is visible to
+them and to anyone sharing the folder. Say what will be created and where, then do it.
+
+Before relying on any of this, verify the connector actually offers it: a tool that takes
+text content only will accept a base64 blob or a mangled string and produce a file that is
+not a valid archive, which is worse than refusing.
+
 ## Which to suggest
 
 Default to whatever the user is already doing. If they name a cloud path, fetch it. If they

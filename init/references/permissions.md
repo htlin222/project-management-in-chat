@@ -15,7 +15,9 @@ access at all. Everything here is about the optional convenience of fetching.
 | Read + create | Automatic | **Still manual** |
 | Full write | Automatic | **Still manual** |
 
-The last two rows are the ones people get wrong.
+The last two rows are the ones people get wrong — **as the tool surfaces stand today**.
+This is an observation about what connectors currently expose, not a permanent property. If
+one offers a genuine binary upload, use it; see `transport.md`.
 
 **More permission does not make releasing automatic.** The ceiling is not the permission
 level, it is the tool surface: the file-creation tools exposed by these connectors accept
@@ -24,7 +26,10 @@ changes nothing about the return trip.
 
 This matters practically, because someone will ask IT to broaden access expecting the loop
 to close, and it will not. Say so before they file the request. Read-only is genuinely
-enough for everything a connector contributes here.
+enough for everything a connector contributes today.
+
+Check rather than assume, in both directions. A binary upload may appear; equally, a tool
+whose name suggests writing may only rename or move. Look at what it actually accepts.
 
 ## Establish what you have — do not assume
 

@@ -210,9 +210,11 @@ done.
 Then `present_files` it and say, in one line: put it in the project folder — **don't
 replace anything**.
 
-**Releases go back by hand.** No connector can write the zip back — this is a property of
-the file APIs exposed to assistants, not one platform's gap. Pulling can be automatic;
-pushing is the user's one manual step. Do not promise otherwise. `references/transport.md`
+**Releases go back by hand** — as things stand. No connector currently offers a binary
+upload, so pulling can be automatic while pushing is the user's one manual step. Check
+rather than assume: if one does offer it, use it, but still **create a new dated file
+rather than overwriting**, for the same reason as everywhere else. Do not promise
+automation that has not been verified. `references/transport.md`
 has the detail, including how to notice on the next open that a release never made it
 back.
 
