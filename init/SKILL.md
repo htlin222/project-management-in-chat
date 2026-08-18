@@ -254,6 +254,34 @@ or when a fetch finds two releases with close timestamps.
 - `scripts/release.py` — packing, tagging, and verification. Always use it; never
   hand-roll the archive.
 
+## Old releases
+
+Every archive holds the complete history, so an older release contains nothing the newest
+one lacks. They are duplicate copies of the same history, not separate backups — deleting
+them is housekeeping, not data loss.
+
+**But verify before deleting, and never delete for the user.** The check is mechanical:
+open the newest archive and list its tags. A tag matching the release being removed proves
+that release's content is fully contained.
+
+```
+2026-08-15-0920_slug.zip   ← safe to remove if tag 2026-08-15-0920 is in the newest repo
+```
+
+Three things break the assumption, and the first is silent:
+
+- **Someone re-ran `git init`.** The newest archive then shares no history with the older
+  ones, and their contents are genuinely unrecoverable. A missing tag is the symptom.
+- **The newest archive is damaged.** A truncated download or failed upload makes the older
+  ones the only copy left.
+- **Something was never committed** — excluded by `.gitignore`, or heavy media kept out of
+  the archive. It is not in the history, so it is not carried forward.
+
+So: keep the last two or three regardless, propose removals as a list the user acts on,
+and never delete anything yourself. Deleting is a user action in their storage, and it is
+the one destructive operation in a system whose whole premise is that nothing gets
+destroyed. Suggest it only when the folder is genuinely crowded, not as tidiness.
+
 ## Closing a project
 
 When the work is done, unpack it into plain files in the cloud folder and retire the zip.
