@@ -1,6 +1,6 @@
 ---
 name: init
-description: Open a single project as a zip containing a git repo, work on it in the sandbox, and release it back as a new dated zip. Use whenever the user says /init, 展開專案, 打開專案, 開一個新專案, 封存, release, or uploads a project zip. Also use whenever they ask 上次到哪, 這個案子怎樣了, 什麼卡住了, 下一步是什麼, 幫我記一下, or want tasks recorded or reviewed inside a project. Use it before packing or unpacking any archive containing non-ASCII filenames, because the `zip` command silently strips them and `unzip` hides the damage. Also use when two versions of a project turn up and need reconciling. Built for cloud storage that can be read but not overwritten, such as OneDrive or SharePoint, where saving means uploading a new file rather than replacing one.
+description: Open a single project as a zip containing a git repo, work on it in the sandbox, and release it back as a new dated zip. Use whenever the user says /init, 展開專案, 打開專案, 開一個新專案, 封存, release, uploads a project zip, or names a cloud folder to fetch one from. Also use whenever they ask 上次到哪, 這個案子怎樣了, 什麼卡住了, 下一步是什麼, 幫我記一下, or want tasks recorded or reviewed inside a project. Use it before packing or unpacking any archive containing non-ASCII filenames, because the `zip` command silently strips them and `unzip` hides the damage. Also use when two versions of a project turn up and need reconciling. Needs no cloud connector — a zip dragged into the conversation is the default route — and is built for storage that can be read but never overwritten, such as OneDrive, SharePoint, Dropbox, or Google Drive.
 ---
 
 # init
@@ -74,30 +74,21 @@ instead, and let the ASCII slug live only inside the archive.
 
 Trigger: `/init`, "打開病歷學會AI課", "去 Dropbox /demo 拿", or a project zip arriving.
 
-Run `scripts/open.py <url-or-path>` for all of it. It fetches, verifies the checksum,
-refuses an archive whose names look encoding-damaged, refuses one that is not really a
-zip, unpacks, runs `git fsck`, and commits any edits the user made outside a session. Each
-of those failures is silent if skipped, which is why they are bundled rather than left as
+A project arrives one of two ways:
+
+- **The user uploads the zip** — the default, and it needs no connector at all. The file
+  lands under `/mnt/user-data/uploads/`.
+- **Fetched from cloud storage** — when a readable connector exists, saves them a
+  download. Take the **newest filename**, never the newest modified time.
+
+Either way, run `scripts/open.py <url-or-path>`. It fetches, verifies the checksum,
+refuses an archive whose names look encoding-damaged, refuses one that is not really a zip,
+unpacks, runs `git fsck`, and commits any edits the user made outside a session. Each of
+those failures is silent if skipped, which is why they are bundled rather than left as
 steps to remember.
 
-**When given a cloud path**, fetch it rather than asking the user to upload:
-
-1. List the project folder and take the **newest filename**. Releases are named
-   `YYYY-MM-DD-HHMM_專案名.zip`, so a plain string sort puts the current one last.
-
-   Never sort by modified time. A three-week-old zip copied in from elsewhere carries
-   today's timestamp; the filename is what someone meant, the modified time is a side
-   effect of the filesystem.
-
-   **Two zips with close stamps that look forked?** Do not take the newest. Fetch both and
-   follow *Two versions* below — taking the newest there means discarding real work.
-2. Get a temporary download URL, and pass it to `open.py` along with whatever checksum
-   the platform reported beside it. These URLs are **single-use, consumed by the first
-   request of any method** — no HEAD, no preflight, no retry. If one is spent, ask for a
-   fresh one rather than reusing it.
-
-Without a checksum the script says so plainly rather than implying the bytes were
-checked.
+See `references/transport.md` for both routes in detail — single-use download URLs, what a
+text-pasted archive looks like, and why the way out is always manual.
 
 However it arrived, `open.py` handles unpacking, first-time `git init` when there is no
 history, and committing edits made outside a session as 手動編輯 — that last one matters,
@@ -219,15 +210,11 @@ done.
 Then `present_files` it and say, in one line: put it in the project folder — **don't
 replace anything**.
 
-**Releases go back by hand.** Connectors generally accept text content only and refuse
-binary, so a zip cannot be uploaded the way it was fetched. Pulling is automatic; pushing
-is the user's one manual step. Do not promise otherwise, and check what the connector
-actually exposes before assuming any platform is different.
-
-Because that step can be skipped, **check for it on the next open**: if the newest file in
-the folder predates the last release handed over, say so plainly. A release that never
-made it back is invisible otherwise, and the next session will silently build on stale
-work.
+**Releases go back by hand.** No connector can write the zip back — this is a property of
+the file APIs exposed to assistants, not one platform's gap. Pulling can be automatic;
+pushing is the user's one manual step. Do not promise otherwise. `references/transport.md`
+has the detail, including how to notice on the next open that a release never made it
+back.
 
 Release early and often, not just at the end. There is no end-of-conversation hook to
 wait for, and a user who leaves mid-conversation should still have something to file.
@@ -254,6 +241,8 @@ or when a fetch finds two releases with close timestamps.
 
 ## Reference files
 
+- `references/transport.md` — how a project gets in and out: direct upload, connector
+  fetch, and why releasing is always manual.
 - `references/merging.md` — reconciling two versions that both hold work. Read it when
   two zips turn up, not before.
 - `scripts/open.py` — fetching, verifying, unpacking, and capturing manual edits.
