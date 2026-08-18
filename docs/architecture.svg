@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" font-family="DejaVu Sans">
+  <rect width="1600" height="1000" fill="#ffffff"/>
+
+  <defs>
+    <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#000000"/>
+    </marker>
+  </defs>
+
+  <!-- header -->
+  <text x="120" y="122" font-size="46" font-weight="700" letter-spacing="-0.5">Project management in chat</text>
+  <text x="120" y="166" font-size="23" fill="#666666">A workflow for cloud storage that can be read but never overwritten.</text>
+  <line x1="120" y1="208" x2="1480" y2="208" stroke="#000000" stroke-width="2"/>
+
+  <!-- ============ LEFT: cloud storage ============ -->
+  <text x="120" y="270" font-size="14" letter-spacing="3" fill="#666666">CLOUD STORAGE</text>
+  <rect x="120" y="292" width="500" height="300" fill="none" stroke="#000000" stroke-width="2"/>
+
+  <text x="152" y="338" font-size="15" font-family="DejaVu Sans Mono" fill="#666666">project-folder/</text>
+
+  <rect x="152" y="356" width="436" height="44" fill="#000000"/>
+  <text x="170" y="384" font-size="16" font-family="DejaVu Sans Mono" fill="#ffffff">2026-08-18-1417_project.zip</text>
+  <text x="516" y="384" font-size="13" font-family="DejaVu Sans Mono" fill="#ffffff">current</text>
+
+  <text x="170" y="432" font-size="16" font-family="DejaVu Sans Mono" fill="#999999">2026-08-18-0915_project.zip</text>
+  <text x="170" y="466" font-size="16" font-family="DejaVu Sans Mono" fill="#999999">2026-08-15-1120_project.zip</text>
+  <text x="170" y="500" font-size="16" font-family="DejaVu Sans Mono" fill="#999999">2026-08-11-1740_project.zip</text>
+
+  <line x1="152" y1="522" x2="588" y2="522" stroke="#dddddd" stroke-width="1"/>
+  <text x="152" y="550" font-size="16">The newest filename is the current version.</text>
+  <text x="152" y="572" font-size="16" fill="#666666">Files are only ever added. Nothing is replaced.</text>
+
+  <!-- ============ RIGHT: sandbox ============ -->
+  <text x="980" y="270" font-size="14" letter-spacing="3" fill="#666666">CONVERSATION</text>
+  <rect x="980" y="292" width="500" height="300" fill="none" stroke="#000000" stroke-width="2"/>
+
+  <text x="1012" y="338" font-size="15" font-family="DejaVu Sans Mono" fill="#666666">sandbox/</text>
+
+  <text x="1012" y="378" font-size="17" font-family="DejaVu Sans Mono">git commit</text>
+  <text x="1012" y="410" font-size="17" font-family="DejaVu Sans Mono">git tag</text>
+  <text x="1012" y="442" font-size="17" font-family="DejaVu Sans Mono">git merge-base</text>
+  <text x="1012" y="474" font-size="17" font-family="DejaVu Sans Mono">git fsck</text>
+
+  <line x1="1012" y1="522" x2="1448" y2="522" stroke="#dddddd" stroke-width="1"/>
+  <text x="1012" y="550" font-size="16">Git runs here, and only here.</text>
+  <text x="1012" y="572" font-size="16" fill="#666666">The user never types a command.</text>
+
+  <!-- ============ ARROWS ============ -->
+  <!-- The asymmetry between these two is the whole idea. -->
+  <!-- read: solid -->
+  <text x="799" y="352" font-size="14" letter-spacing="3" fill="#666666" text-anchor="middle">READ</text>
+  <line x1="640" y1="378" x2="958" y2="378" stroke="#000000" stroke-width="2.5" marker-end="url(#tip)"/>
+  <text x="799" y="414" font-size="26" font-weight="700" text-anchor="middle">automatic</text>
+
+  <!-- write: dashed — the signature -->
+  <text x="799" y="474" font-size="14" letter-spacing="3" fill="#666666" text-anchor="middle">WRITE</text>
+  <line x1="958" y1="500" x2="640" y2="500" stroke="#000000" stroke-width="2.5"
+        stroke-dasharray="9 9" marker-end="url(#tip)"/>
+  <text x="799" y="536" font-size="26" font-weight="700" text-anchor="middle">by hand</text>
+  <text x="799" y="562" font-size="15" fill="#666666" text-anchor="middle">no connector uploads binary</text>
+
+  <!-- ============ INSIDE THE ZIP ============ -->
+  <text x="120" y="686" font-size="14" letter-spacing="3" fill="#666666">INSIDE ONE ZIP</text>
+  <line x1="120" y1="706" x2="1480" y2="706" stroke="#000000" stroke-width="2"/>
+
+  <text x="120" y="750" font-size="17" font-family="DejaVu Sans Mono">todo.txt</text>
+  <text x="120" y="778" font-size="15" fill="#666666">what is next</text>
+
+  <text x="392" y="750" font-size="17" font-family="DejaVu Sans Mono">done.txt</text>
+  <text x="392" y="778" font-size="15" fill="#666666">what happened</text>
+
+  <text x="664" y="750" font-size="17" font-family="DejaVu Sans Mono">notes.md</text>
+  <text x="664" y="778" font-size="15" fill="#666666">three lines of status</text>
+
+  <text x="936" y="750" font-size="17" font-family="DejaVu Sans Mono">files/</text>
+  <text x="936" y="778" font-size="15" fill="#666666">documents</text>
+
+  <text x="1208" y="750" font-size="17" font-family="DejaVu Sans Mono">.git/</text>
+  <text x="1208" y="778" font-size="15" fill="#666666">every version, since day one</text>
+
+  <!-- ============ FOOTER ============ -->
+  <line x1="120" y1="838" x2="1480" y2="838" stroke="#000000" stroke-width="2"/>
+  <text x="120" y="884" font-size="21">Each archive holds the complete history, so a single file restores any earlier state.</text>
+  <text x="120" y="916" font-size="21" fill="#666666">Because nothing is overwritten, nothing can be lost — and the one manual step is the one that keeps it that way.</text>
+
+  <text x="120" y="962" font-size="15" font-family="DejaVu Sans Mono" fill="#999999">github.com/htlin222/project-management-in-chat</text>
+</svg>
