@@ -48,7 +48,18 @@ Dropbox 的 `create_file` 在路徑已存在時直接回 `ALREADY_EXISTS`；Goog
 
 到 [Releases](https://github.com/htlin222/project-management-in-chat/releases) 下載 `init.skill`，在 Claude 裡上傳並儲存。
 
-或直接使用 `init/` 目錄的內容。
+或是直接把這個 repo 當工作區打開 —— skill 已經放在 agent 會自己去找的位置：
+
+```
+init/                    唯一一份本體
+.claude/skills/init  →   symlink 到 init/
+.agent/skills/init   →   symlink 到 init/
+HOUSEKEEPING.md      →   symlink 到 init/HOUSEKEEPING.md
+```
+
+用 symlink 而不是複製，是為了只有一份要維護。改 `init/` 裡的檔案，兩個路徑同時生效，不會出現「哪一份才是真的」這種問題。
+
+`HOUSEKEEPING.md` 是給人看的入口：說明書在哪、兩個指令怎麼下、哪三條規則不能破。
 
 ## 怎麼用
 
@@ -88,11 +99,14 @@ Dropbox 的 `create_file` 在路徑已存在時直接回 `ALREADY_EXISTS`；Goog
 每一包裡面：
 
 ```
-todo.txt      接下來要做什麼
-done.txt      發生過什麼（做完的、算了的）
-notes.md      三行狀態
-files/        文件
-.git/         歷史
+todo.txt                 接下來要做什麼
+done.txt                 發生過什麼（做完的、算了的）
+notes.md                 三行狀態
+files/                   文件
+.git/                    歷史
+HOUSEKEEPING.md          怎麼叫出這些 skill 來用
+.claude/skills/init/     說明書本體，Claude 各介面讀這裡
+.agent/skills/init/      同一份，不綁廠商的位置
 ```
 
 任務一行就是一行，**沒有語法**：
@@ -114,6 +128,20 @@ files/        文件
 ```
 
 `todo.txt` 回答「還有什麼沒做」，「最可能出事」回答**「這個案子會不會成」** —— 那是待辦清單和專案管理的差別。
+
+## 說明書跟著專案走
+
+每一包 zip 裡都帶著這個 skill 自己 —— `.claude/skills/init/` 和 `.agent/skills/init/` 各一份真實檔案，加上根目錄的 `HOUSEKEEPING.md`。
+
+理由很簡單：**zip 會在哪裡被打開，不是這裡能決定的。** 可能是另一個 Claude 介面、別家的 agent、同事那台什麼都沒裝的電腦。假設「對面裝了這個 skill」和假設「對面有 connector」是同一種錯誤 —— 在這裡成立，在別處不一定。
+
+所以規則有三條：
+
+- **是真實檔案，不是 symlink。** repo 裡那兩個路徑確實是 symlink，那對 git 是對的，對 zip 是錯的：Python 的 `extractall` 不會還原 symlink，它會寫出一個內容是路徑字串的純文字檔，解開之後說明書就變成一行指向不存在位置的字。多六個小檔案很便宜，說明書解開是壞的不便宜。
+- **只新增，不覆寫。** 帶說明書出去的意義就是它能在對面被維護。內容不一樣時只會提示、不會蓋掉；要換成本地版本，明確下 `open.py --refresh-skill`。跟 release 同一條規則，同一個理由。
+- **不設執行權限、不產生 `__pycache__`。** `extractall` 不保留權限位元，可執行檔一來一回就會被 git 看成有改動，於是每次打開都多一筆「手動編輯」—— 那個訊號本來是用來說「使用者在對話外改了東西」的，被雜訊填滿就沒用了。腳本一律用 `python3 <路徑>` 執行。
+
+`open.py` 缺什麼補什麼，`release.py` 打包前補、打包後再把 zip 打開驗一次 —— 跟驗 `.git` 一樣，少了就不交件。兩邊都自動，不需要記得。
 
 ## 幾個踩過的坑
 

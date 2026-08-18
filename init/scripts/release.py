@@ -13,6 +13,10 @@ guesses well enough to hide this, which is exactly what makes it dangerous. Pyth
 zipfile sets the flag correctly, and verify_flags() below refuses to hand over an archive
 where it is missing.
 
+Before packing it also makes sure the manual is inside the project — see bundle.py —
+and the verification step below refuses an archive that lost it. A zip that opens on a
+platform with nothing installed still has to be workable.
+
 Usage:
     release.py <project-dir> [output-dir]
     RELEASE_MESSAGE="確認長庚時間" release.py <project-dir>
@@ -20,12 +24,20 @@ Usage:
 Exit codes: 0 ok, 1 failed.
 """
 
+import sys
+
+# Set before importing the sibling module: writing bytecode would leave a __pycache__
+# directory inside the project, which then rides into git and into the next release as
+# noise. Nothing here is hot enough to need it.
+sys.dont_write_bytecode = True
+
 import os
 import subprocess
-import sys
 import time
 import zipfile
 from pathlib import Path
+
+import bundle
 
 
 def git(repo, *args, check=True):
@@ -45,7 +57,9 @@ def pack(src: Path, zip_path: Path):
     root = src.parent
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
         for dirpath, dirnames, filenames in os.walk(src):
-            dirnames.sort()
+            # Byte-compiled leftovers from running the bundled scripts. Not content,
+            # and they differ between machines for no reason.
+            dirnames[:] = sorted(d for d in dirnames if d != "__pycache__")
             here = Path(dirpath)
             # Directory entries keep empty folders (資料/ with only a .keep still needs
             # its parent) and make the archive readable when listed.
@@ -116,6 +130,10 @@ def main():
         fail(f"no .git in {src.name} — git init and make a first commit before releasing")
 
     name = src.name
+
+    # The manual travels with the project, so the next platform needs nothing installed.
+    bundle.report(*bundle.install(src))
+
     non_ascii = check_ascii(src)
 
     # Uncommitted work must land in history, or it is invisible to any later comparison.
@@ -168,6 +186,12 @@ def main():
         names = zipfile.ZipFile(zip_path).namelist()
         if not any(n.startswith(f"{name}/") for n in names):
             fail("archive root does not match project name")
+        # Losing the manual is as silent as losing .git, and shows up in the same place:
+        # on a platform where nothing is installed and nobody can tell what the rules are.
+        manual = bundle.skill_root().name
+        for base in bundle.SKILL_DIRS:
+            if f"{name}/{base}/{manual}/SKILL.md" not in names:
+                fail(f"{base}/{manual}/SKILL.md missing from archive")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

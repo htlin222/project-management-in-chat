@@ -93,7 +93,8 @@ text-pasted archive looks like, and why the way out is always manual.
 However it arrived, `open.py` handles unpacking, first-time `git init` when there is no
 history, and committing edits made outside a session as 手動編輯 — that last one matters,
 because work that is not committed is invisible to every later comparison and a
-reconciliation would quietly discard it.
+reconciliation would quietly discard it. It also installs the manual if the archive came
+from somewhere that did not carry one.
 
 Then **orient**, in this order:
    - **最可能出事** — from `notes.md`. One sentence.
@@ -105,7 +106,8 @@ Opening *is* the "上次到哪" habit — the command and the ritual are the sam
 is why this works: it pays the user back the moment they run it.
 
 **Nothing exists yet?** Create the skeleton — `todo.txt`, `notes.md`, `git init`, one
-commit — and release it immediately so the user has something to file.
+commit — then release it immediately so the user has something to file. `release.py` adds
+the manual on its way out, so even the first zip is self-describing.
 
 ## Inside a project
 
@@ -132,11 +134,14 @@ filename, the event in the folder.
 Inside the zip:
 
 ```
-todo.txt        what's next
-done.txt        what happened
-notes.md        three lines, written in the user's language
-files/          documents
-.git/           history — must always travel with the zip
+todo.txt                    what's next
+done.txt                    what happened
+notes.md                    three lines, written in the user's language
+files/                      documents
+.git/                       history — must always travel with the zip
+HOUSEKEEPING.md             how to call the skill, for whoever opens this next
+.claude/skills/init/        this skill, so the rules travel with the project
+.agent/skills/init/         the same, at the vendor-neutral path
 ```
 
 Structural names are ASCII on purpose — see the section above. `notes.md` carries the
@@ -181,6 +186,35 @@ words (`算了：重複`).
 The middle line is the whole difference between a task list and project management, and
 it is what opening reads first.
 
+## The manual travels with the project
+
+The zip gets opened wherever the user happens to be — another Claude surface, another
+vendor's agent, a laptop with nothing installed. Assuming this skill is present there is
+the same mistake as assuming a connector is: it is true here and nowhere in particular
+else. So a copy of the skill rides inside every archive, at both paths agents actually
+look in, plus `HOUSEKEEPING.md` at the root as the front door for a person.
+
+`open.py` and `release.py` both call `bundle.py`, so this needs no remembering: opening
+installs whatever is missing, releasing refuses to hand over an archive that lost it —
+checked by reopening the zip, the same way `.git` is checked.
+
+Three rules make it hold up:
+
+- **Real files, never symlinks.** In this skill's own repository those two paths *are*
+  symlinks to one source, which is right for git and wrong for a zip: Python's
+  `extractall` does not restore a symlink, it writes a regular file containing the target
+  path, and the manual would arrive as a one-line text file pointing nowhere. Duplicating
+  six small files is cheap; a manual that unpacks broken is not.
+- **Never overwrite, only add.** The whole point of shipping the manual is that it can be
+  *maintained* on the other side. A copy that differs from the installed version is
+  reported and left alone; `open.py --refresh-skill` is the deliberate way to take the
+  local version instead. Same rule as releases, for the same reason.
+- **Bundled copies are not executable, and no bytecode is written.** `extractall` drops
+  permission bits, so an executable file comes back changed and every open would produce
+  a spurious 手動編輯 commit — which would make that signal, the one that says the user
+  edited something outside a session, worthless. Invoke them as
+  `python3 .claude/skills/init/scripts/release.py`.
+
 ## Committing
 
 Commit as work happens — it is free here, with no round trip. Write the message about the
@@ -211,9 +245,9 @@ the only thing that survives the round trip intact.
 
 ## Releasing
 
-Run `scripts/release.py <project-dir>`. It commits anything outstanding, **tags the
-released commit**, packs the whole directory **including `.git`**, then verifies the
-archive reopens with its history and tag intact.
+Run `scripts/release.py <project-dir>`. It puts the manual in place, commits anything
+outstanding, **tags the released commit**, packs the whole directory **including `.git`**,
+then verifies the archive reopens with its history, its tag, and its manual intact.
 
 The tag *is* the filename prefix — tag `2026-08-18-1341` inside
 `2026-08-18-1341_病歷學會AI課.zip` — so the archive and the history point at each other.
@@ -271,6 +305,11 @@ or when a fetch finds two releases with close timestamps.
 - `scripts/open.py` — fetching, verifying, unpacking, and capturing manual edits.
 - `scripts/release.py` — packing, tagging, and verification. Always use it; never
   hand-roll the archive.
+- `scripts/bundle.py` — puts this skill inside the project so it travels in the zip.
+  Both scripts call it; there is nothing to run by hand.
+- `HOUSEKEEPING.md` — the front door that lands at the project root: which paths hold
+  the manual, the two commands, and the three rules that cannot be broken. Written for
+  whoever opens the zip on a platform where nothing is installed.
 
 ## Old releases
 
