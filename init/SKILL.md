@@ -184,9 +184,27 @@ it is what opening reads first.
 ## Committing
 
 Commit as work happens — it is free here, with no round trip. Write the message about the
-decision, not the file change: 「確認長庚時間 09:00，備課可以動了」 beats 「update
-todo.txt」. Those messages are the project's history, and `git log` is what makes "上次到
-哪" answerable beyond the current three lines.
+decision, not the file change: 「確認長庚時間 09:00」 beats 「update todo.txt」. Those
+messages are the project's history, and `git log` is what makes "上次到哪" answerable
+beyond the current three lines. They are also the only thing that answers *why*, which is
+what someone actually wants three months later — a version history can only show what
+changed.
+
+**There is no length limit, so do not economise.** Write a short first line, a blank line,
+then as much as the decision deserves:
+
+```
+確認長庚時間 09:00
+
+主辦窗口回信確認 8/29 早上九點開始，一整天。
+備課可以動了，但 IMBrave150 那段要更新到最新的 OS 數據。
+下一步：先把兩堂大綱列出來給主辦看過。
+```
+
+The first line is what `git log --oneline` shows, so keep it scannable — around 25
+characters in Chinese, 50 in English. Everything after the blank line is unconstrained and
+is where the reasoning belongs. A one-line message that merely names the file is the only
+real mistake here.
 
 Never rebase, never amend, never force. History is a record, and rewriting it destroys
 the only thing that survives the round trip intact.
