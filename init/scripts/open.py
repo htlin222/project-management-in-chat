@@ -7,8 +7,13 @@ upstream, a missing .git, and the user's own uncommitted edits. Each one only su
 much later, as a corrupt repo or a reconciliation with nothing to reconcile against.
 Bundling them here means they cannot be forgotten.
 
+Opening also makes sure the project carries its own manual — see bundle.py. A release
+that lands on a platform where this skill is not installed is still workable, because the
+rules travel inside the zip.
+
 Usage:
     open.py <url-or-path> [--sha256 HASH] [--dest DIR] [--name EXPECTED_ROOT]
+            [--refresh-skill]
 
     open.py https://…/file --sha256 e6d4…      fetch, verify, unpack
     open.py ./2026-08-18-1417_emr-ai-course.zip   local file, same checks
@@ -19,15 +24,23 @@ request of any method — no HEAD, no preflight, no retry. If one is spent, get 
 Exit codes: 0 ok, 1 failed.
 """
 
+import sys
+
+# Set before importing the sibling module: writing bytecode would leave a __pycache__
+# directory inside the project, which then rides into git and into the next release as
+# noise. Nothing here is hot enough to need it.
+sys.dont_write_bytecode = True
+
 import argparse
 import hashlib
 import shutil
 import subprocess
-import sys
 import tempfile
 import zipfile
 from pathlib import Path
 from urllib.parse import urlparse
+
+import bundle
 
 
 def fail(msg):
@@ -97,6 +110,9 @@ def main():
     ap.add_argument("--sha256", help="expected content hash reported by the platform")
     ap.add_argument("--dest", default="/home/claude", help="where to unpack")
     ap.add_argument("--name", help="expected archive root, if known")
+    ap.add_argument("--refresh-skill", action="store_true",
+                    help="overwrite the bundled manual with the installed version "
+                         "(default: add what is missing, never replace)")
     args = ap.parse_args()
 
     tmp = Path(tempfile.mkdtemp())
@@ -153,6 +169,14 @@ def main():
                 print("  uncommitted edits found — committing as 手動編輯")
                 git(dest, "add", "-A")
                 git(dest, "commit", "-qm", "手動編輯")
+
+        # The manual rides inside the project so the next platform needs nothing
+        # installed. Adds what is missing; never silently replaces an edited copy.
+        added, replaced, differing = bundle.install(dest, force=args.refresh_skill)
+        bundle.report(added, replaced, differing)
+        if added or replaced:
+            git(dest, "add", "-A")
+            git(dest, "commit", "-qm", "帶上說明書：.claude/skills 與 .agent/skills")
 
         print(dest)
         print(f"  commits: {git(dest, 'rev-list', '--count', 'HEAD')}   "
