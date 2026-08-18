@@ -243,6 +243,9 @@ or when a fetch finds two releases with close timestamps.
 
 - `references/transport.md` — how a project gets in and out: direct upload, connector
   fetch, and why releasing is always manual.
+- `references/permissions.md` — what connector access buys, how to establish what is
+  granted, and how to read an access failure. Read it when a connector misbehaves or the
+  user asks what permissions they need.
 - `references/merging.md` — reconciling two versions that both hold work. Read it when
   two zips turn up, not before.
 - `scripts/open.py` — fetching, verifying, unpacking, and capturing manual edits.
