@@ -181,6 +181,39 @@ words (`算了：重複`).
 The middle line is the whole difference between a task list and project management, and
 it is what opening reads first.
 
+## todo.txt interop — a generated view, never the source
+
+The files above are deliberately syntax-free: a person reads them, no program does. That
+does not change. But the *same content* can be handed to the todo.txt ecosystem
+([todotxt/todo.txt](https://github.com/todotxt/todo.txt) apps, `tod.sh`, mobile clients)
+for free, as a **derived** copy the user never writes and never sees the syntax of.
+
+`scripts/todotxt.py` writes that copy into `export/`, and `release.py` regenerates it on
+every release so it travels in the zip:
+
+```
+todo.txt   (root, plain words)  ──derive──▶  export/todo.txt   (todo.txt-spec)
+done.txt   (root, plain words)  ──derive──▶  export/done.txt   (todo.txt-spec)
+```
+
+The mapping is intentionally small — only what can be derived without guessing:
+
+| source (human) | export (spec) |
+|---|---|
+| a line beginning `等` | `… @waiting` |
+| a line beginning `不確定` | `… @uncertain` |
+| a finished/abandoned line in `done.txt` | `x <date> …` (completion mark) |
+| a leading `YYYY-MM-DD` | kept as the spec creation date |
+
+`(A)` priority and `+project` are deliberately left out: one project needs no `+project`,
+and priority already lives in `notes.md`. Every transform is idempotent, so re-exporting
+each release never churns history.
+
+**`export/` is a projection, not the truth.** Never hand-edit it, never merge from it —
+it is regenerated from the root files and deleting it loses nothing. The root `todo.txt`
+and `done.txt` remain the only things anyone edits, in plain words, exactly as before.
+Set `RELEASE_NO_EXPORT=1` to skip generation entirely.
+
 ## Committing
 
 Commit as work happens — it is free here, with no round trip. Write the message about the
@@ -271,6 +304,9 @@ or when a fetch finds two releases with close timestamps.
 - `scripts/open.py` — fetching, verifying, unpacking, and capturing manual edits.
 - `scripts/release.py` — packing, tagging, and verification. Always use it; never
   hand-roll the archive.
+- `scripts/todotxt.py` — generates the derived todo.txt-spec view under `export/`.
+  Run automatically by `release.py`; can also be run standalone (`export` / `show` /
+  `check`).
 
 ## Old releases
 
