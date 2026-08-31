@@ -71,6 +71,26 @@ def verify_flags(zip_path: Path):
                 fail(f"UTF-8 flag missing on {info.filename!r} — names would be mangled")
 
 
+def generate_export(src: Path):
+    """Regenerate the todo.txt-spec view under export/ so it ships with the release.
+
+    A projection of the natural-language todo.txt / done.txt — never the source of truth.
+    Best-effort: a failure here must not block a release, since transport is the job that
+    matters. Set RELEASE_NO_EXPORT=1 to skip. Returns the files written (possibly empty).
+    """
+    if os.environ.get("RELEASE_NO_EXPORT"):
+        return []
+    if not (src / "todo.txt").is_file() and not (src / "done.txt").is_file():
+        return []
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import todotxt
+        return todotxt.export(src, time.strftime("%Y-%m-%d"))
+    except Exception as e:  # never let the projection break the release
+        print(f"  note: export/ not regenerated ({e})")
+        return []
+
+
 def check_ascii(src: Path):
     """Structure must be ASCII; report anything else.
 
@@ -117,6 +137,10 @@ def main():
 
     name = src.name
     non_ascii = check_ascii(src)
+
+    # Refresh the derived todo.txt-spec view before committing, so it travels in the zip
+    # and its history. Regenerated every release; the natural-language source is untouched.
+    exported = generate_export(src)
 
     # Uncommitted work must land in history, or it is invisible to any later comparison.
     if git(src, "status", "--porcelain"):
@@ -175,6 +199,9 @@ def main():
     print(zip_path)
     print(f"  tag: {stamp}   commits: {commits}   head: {head[:7]}   "
           f"size: {size // 1024}K   verified")
+
+    if exported:
+        print(f"  export: {', '.join(exported)} — todo.txt-spec view, generated (not the source)")
 
     if non_ascii:
         print(f"  note: {len(non_ascii)} file name(s) contain non-ASCII characters. They "
